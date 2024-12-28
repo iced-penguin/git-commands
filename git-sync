@@ -1,0 +1,61 @@
+#!/bin/bash
+
+set -e
+
+function usage() {
+  cat << EOF
+Usage:
+  git sync <branch>
+
+Description:
+  Syncs the current branch with the specified branch.
+EOF
+}
+
+function sync() {
+  local branch=$1
+  local should_pull_latest=$2
+
+  git checkout $branch
+  if [ "$should_pull_latest" = true ]; then
+    git pull --recurse-submodules
+  fi
+  git checkout -
+  git merge $branch
+}
+
+if [ $# -eq 0 ]; then
+  usage
+  exit 1
+fi
+
+branch=""
+should_pull_latest=false
+
+while [ $# -gt 0 ]; do
+  case $1 in
+    -h|help)
+      usage
+      exit 0
+      ;;
+    -f|--from)
+      branch=$2
+      shift
+      shift
+      ;;
+    -l|--latest)
+      should_pull_latest=true
+      shift
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+if [ -z $branch ]; then
+  usage
+  exit 1
+fi
+sync $branch $should_pull_latest
