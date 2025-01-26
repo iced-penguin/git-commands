@@ -3,9 +3,13 @@
 set -e
 
 function usage() {
-  cat << EOF
+  cat <<EOF
 Usage:
-  git sync <branch>
+  git sync <branch> [options]
+
+Options:
+  -h, help       Show this help message
+  -l, --latest   Pull the latest changes from the remote branch before merging
 
 Description:
   Syncs the current branch with the specified branch.
@@ -29,28 +33,25 @@ if [ $# -eq 0 ]; then
   exit 1
 fi
 
-branch=""
+branch=$1
+shift
+
 should_pull_latest=false
 
 while [ $# -gt 0 ]; do
   case $1 in
-    -h|help)
-      usage
-      exit 0
-      ;;
-    -f|--from)
-      branch=$2
-      shift
-      shift
-      ;;
-    -l|--latest)
-      should_pull_latest=true
-      shift
-      ;;
-    *)
-      usage
-      exit 1
-      ;;
+  -h | help)
+    usage
+    exit 0
+    ;;
+  -l | --latest)
+    should_pull_latest=true
+    shift
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
   esac
 done
 
