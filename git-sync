@@ -20,12 +20,12 @@ function sync() {
   local branch=$1
   local should_pull_latest=$2
 
-  git checkout $branch
+  git checkout "$branch"
   if [ "$should_pull_latest" = true ]; then
     git pull --recurse-submodules
   fi
   git checkout -
-  git merge $branch
+  git merge "$branch"
 }
 
 if [ $# -eq 0 ]; then
@@ -55,8 +55,8 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-if [ -z $branch ]; then
+if [ -z "$branch" ]; then
   usage
   exit 1
 fi
-sync $branch $should_pull_latest
+sync "$branch" $should_pull_latest
