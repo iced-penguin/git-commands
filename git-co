@@ -1,0 +1,70 @@
+#!/bin/bash
+
+set -e
+
+function usage() {
+  echo "Usage git co [options]"
+  echo "Options:"
+  echo "  -d, --default        Checkout the default branch"
+  echo "  -f, --fetch <branch> Fetch and checkout the specified branch"
+  echo "  -i, --interactive    Interactively select and checout a local branch"
+  echo "  -n, --new <branch>   Create and checkout a new branch"
+}
+
+if [[ $# -eq 0 ]]; then
+  usage
+  exit 1
+fi
+
+case "$1" in
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  -d | --default)
+    default_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
+    if [[ -z "$default_branch" ]]; then
+      echo "Could not get the default branch."
+      exit 1
+    fi
+    git switch "$default_branch"
+    ;;
+  -f | --fetch)
+    if [[ -z "$2" ]]; then
+      usage
+      exit 1
+    fi
+    branch="$2"
+    git fetch origin "$branch"
+    git switch "$branch"
+    ;;
+  -i | --interactive)
+    if ! command -v fzf >/dev/null 2>&1; then
+      echo "fzf is not installed. Please install fzf to use interactive mode."
+      exit 1
+    fi
+    selected_branch=$(git branch --format='%(refname:short)' | fzf \
+      --header="Select branch:" \
+      --border \
+      --layout=reverse \
+      --cycle
+    )
+    if [[ -z "$selected_branch" ]]; then
+      echo "No branch selected."
+      exit 1
+    fi
+    git switch "$selected_branch"
+    ;;
+  -n | --new)
+    if [[ -z "$2" ]]; then
+      usage
+      exit 1
+    fi
+    branch="$2"
+    git switch -c "$branch"
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+esac
