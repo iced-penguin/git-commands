@@ -3,7 +3,7 @@
 set -e
 
 function usage() {
-  echo "Usage git co [options]"
+  echo "Usage: git co [options]"
   echo "Options:"
   echo "  -d, --default        Checkout the default branch"
   echo "  -f, --fetch <branch> Fetch and checkout the specified branch"

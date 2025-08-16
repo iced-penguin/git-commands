@@ -1,0 +1,46 @@
+#!/bin/bash
+
+set -e
+
+function usage() {
+  echo "Usage: git br [options]"
+  echo "Options:"
+  echo "  -h, --help   Show this help message"
+  echo "  -c, --clean  Delete unnecessary branches"
+}
+
+case "$1" in
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  -c | --clean)
+    # リモートの最新情報を取得
+    git fetch --prune
+
+    # 削除対象ブランチを取得
+    target_branches=$(git branch -vv | grep ': gone]' || true)
+
+    if [[ -z "$target_branches" ]]; then
+      echo "No branch was deleted."
+      exit 0
+    fi
+
+    echo "Branches below will be deleted:"
+    echo "$target_branches"
+    echo ""
+    echo -n "Delete branches? (y/n):"
+    read -r answer
+    if [[ "$answer" != "y" ]]; then
+      echo "Cancelled."
+      exit 0
+    fi
+
+    # 削除対象ブランチを全て削除
+    echo "$target_branches" | awk '{print $1}' | xargs git branch -D
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+esac
